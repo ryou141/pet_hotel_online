@@ -1,0 +1,115 @@
+.staff-stat-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.staff-stat-card {
+  flex: 1;
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: var(--c);
+}
+.staff-stat-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--c);
+  line-height: 1;
+}
+.staff-stat-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.staff-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.staff-pet-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.staff-pet-card {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.staff-pet-avatar {
+  width: 44px;
+  height: 44px;
+  background: var(--primary-ultra);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.staff-pet-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 120px;
+}
+.staff-pet-name   { font-size: 1rem; font-weight: 700; color: var(--text); }
+.staff-pet-species { font-size: 0.8rem; color: var(--text-secondary); }
+.staff-pet-breed  { font-size: 0.78rem; color: var(--text-secondary); font-style: italic; }
+
+.staff-pet-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+.staff-pet-room  { font-weight: 600; color: var(--primary); }
+.staff-pet-dates { display: flex; align-items: center; gap: 4px; }
+.staff-pet-owner { font-size: 0.76rem; }
+
+.staff-pet-wishes {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  margin-top: 6px;
+  padding: 7px 10px;
+  background: var(--primary-ultra);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  color: var(--text);
+  line-height: 1.4;
+  grid-column: 1 / -1;
+  flex-shrink: 0;
+}
+.staff-pet-wishes svg {
+  color: var(--primary);
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .staff-stat-row { flex-direction: column; }
+  .staff-pet-card { flex-wrap: wrap; }
+}

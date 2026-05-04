@@ -1,0 +1,121 @@
+.pet-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--border);
+  overflow: hidden;
+  transition: var(--transition);
+}
+.pet-card:hover { box-shadow: var(--shadow); }
+
+.pet-card-active { border-color: var(--success); }
+
+.pet-card-status-bar {
+  background: linear-gradient(90deg, var(--success), #50b85a);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 8px 16px;
+  letter-spacing: 0.02em;
+}
+.pet-card-status-pending {
+  background: linear-gradient(90deg, var(--warning), #e8b800);
+  color: #2C3E50;
+}
+
+.pet-card-top {
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+  align-items: flex-start;
+}
+
+.pet-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--accent);
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  border: 3px solid var(--border);
+}
+.pet-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pet-main-info { flex: 1; min-width: 0; }
+
+.pet-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.pet-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.pet-tag {
+  background: var(--accent);
+  color: var(--primary-dark);
+  border-radius: var(--radius-pill);
+  padding: 3px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.pet-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pet-edit-form { width: 100%; }
+
+.pet-card-stream,
+.pet-card-notes {
+  padding: 0 20px 20px;
+  border-top: 1px solid var(--border);
+  margin-top: 0;
+  padding-top: 16px;
+}
+
+.pet-card-section-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.note-item {
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  border-left: 3px solid var(--primary);
+}
+
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.note-author { font-size: 0.82rem; font-weight: 700; color: var(--text); }
+.note-date   { font-size: 0.78rem; color: var(--text-light); }
+.note-content { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; }

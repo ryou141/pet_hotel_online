@@ -1,0 +1,97 @@
+.checkin-section {
+  background: linear-gradient(160deg, var(--primary-ultra) 0%, var(--bg) 100%);
+}
+
+.checkin-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.checkin-card {
+  position: relative;
+  height: 480px;
+  perspective: 1200px;
+  cursor: pointer;
+}
+
+.checkin-front,
+.checkin-back {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-lg);
+  padding: 36px 28px;
+  backface-visibility: hidden;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.checkin-front {
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  box-shadow: var(--shadow);
+  transform: rotateY(0deg);
+}
+
+.checkin-back {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: #fff;
+  transform: rotateY(180deg);
+  overflow-y: auto;
+}
+
+.checkin-card:hover .checkin-front { transform: rotateY(-180deg); }
+.checkin-card:hover .checkin-back  { transform: rotateY(0deg); }
+
+.checkin-icon {
+  font-size: 3rem;
+  margin-bottom: 18px;
+}
+
+.checkin-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.checkin-short {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  flex: 1;
+}
+
+.checkin-hover-hint {
+  font-size: 0.78rem;
+  color: var(--primary);
+  font-weight: 600;
+  margin-top: 16px;
+}
+
+.checkin-back-icon {
+  font-size: 2rem;
+  margin-bottom: 12px;
+}
+.checkin-back-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.9);
+  margin-bottom: 14px;
+}
+.checkin-full {
+  font-size: 0.84rem;
+  color: rgba(255,255,255,0.85);
+  line-height: 1.7;
+  white-space: pre-line;
+}
+
+@media (max-width: 900px) {
+  .checkin-grid { grid-template-columns: 1fr; }
+  .checkin-card { height: auto; perspective: none; }
+  .checkin-front { position: static; transform: none !important; padding-bottom: 0; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+  .checkin-back { position: static; transform: none !important; border-radius: 0 0 var(--radius-lg) var(--radius-lg); padding-top: 24px; }
+  .checkin-hover-hint { display: none; }
+}
