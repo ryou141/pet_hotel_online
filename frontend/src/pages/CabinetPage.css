@@ -94,7 +94,7 @@
   border-radius: var(--radius-lg);
   border: 2px dashed var(--border);
 }
-.empty-pets span { font-size: 4rem; display: block; margin-bottom: 16px; }
+.empty-pets span { display: block; margin-bottom: 16px; }
 .empty-pets h3 { margin-bottom: 10px; }
 .empty-pets p { color: var(--text-secondary); margin-bottom: 24px; }
 

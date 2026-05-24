@@ -32,13 +32,15 @@
 
 .hero-paw {
   position: absolute;
-  font-size: 14rem;
+  width: 14rem;
+  height: 14rem;
   opacity: 0.06;
   pointer-events: none;
   z-index: 1;
+  color: var(--primary);
 }
 .hero-paw-1 { bottom: -40px; right: 5%; animation: floatPaw 8s ease-in-out infinite alternate; }
-.hero-paw-2 { top: 10%; left: -30px; font-size: 8rem; animation: floatPaw 10s ease-in-out infinite alternate-reverse; }
+.hero-paw-2 { top: 10%; left: -30px; width: 8rem; height: 8rem; animation: floatPaw 10s ease-in-out infinite alternate-reverse; }
 
 @keyframes floatPaw {
   from { transform: translateY(0) rotate(-5deg); }

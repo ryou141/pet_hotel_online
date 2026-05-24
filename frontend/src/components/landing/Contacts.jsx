@@ -58,11 +58,11 @@ export default function Contacts() {
             </div>
           </div>
 
-          <div className="contacts-socials">
+          {/* <div className="contacts-socials">
             <a href="#" className="contact-social">Telegram</a>
             <a href="#" className="contact-social">ВКонтакте</a>
             <a href="#" className="contact-social">WhatsApp</a>
-          </div>
+          </div> */}
         </div>
       </div>
     </section>

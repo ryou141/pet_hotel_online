@@ -5,7 +5,7 @@ Accepts base64-encoded JPEG frames from the frontend, runs YOLOv8-pose
 inference, and returns the detected dog state back over the same socket.
 
 Place your trained weights at: backend/app/cv/dog_pose.pt
-If the file is missing, falls back to the heuristic classifier.
+If the file is missing, the module returns state="unknown" for all requests.
 
 States:
   lying   — питомец лежит      (YOLO class 0: Lie-Down)
@@ -141,7 +141,7 @@ def _decode_frame(b64_data: str) -> Optional[np.ndarray]:
 def _run_yolo(frame: np.ndarray) -> dict:
     model = _load_model()
     if model is None:
-        return _fallback_heuristic(frame)
+        return {"state": "unknown", "confidence": 0.0, "label": "Модель недоступна"}
 
     try:
         results = model(frame, conf=0.4, iou=0.45, verbose=False)
@@ -180,30 +180,7 @@ def _run_yolo(frame: np.ndarray) -> dict:
 
     except Exception as exc:
         logger.error("YOLO inference error: %s", exc)
-        return _fallback_heuristic(frame)
-
-
-def _fallback_heuristic(frame: np.ndarray) -> dict:
-    """Simple contour-based fallback when YOLO weights are not available."""
-    try:
-        gray    = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        blurred = cv2.GaussianBlur(gray, (21, 21), 0)
-        thresh  = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_MEAN_C,
-                                        cv2.THRESH_BINARY_INV, 31, 10)
-        contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        if not contours:
-            return {"state": "unknown", "confidence": 0.0, "label": "Не определено"}
-        largest = max(contours, key=cv2.contourArea)
-        if cv2.contourArea(largest) < 500:
-            return {"state": "unknown", "confidence": 0.3, "label": "Не определено"}
-        _, _, w, h = cv2.boundingRect(largest)
-        aspect = w / h if h > 0 else 1.0
-        if   aspect > 1.6: state, label, conf = "lying",   "Лежит",  0.65
-        elif aspect < 0.7:  state, label, conf = "sitting", "Сидит",  0.60
-        else:               state, label, conf = "standing","Стоит",  0.55
-        return {"state": state, "confidence": conf, "label": label}
-    except Exception:
-        return {"state": "unknown", "confidence": 0.0, "label": "Ошибка"}
+        return {"state": "unknown", "confidence": 0.0, "label": "Ошибка инференса"}
 
 
 # ─── WebSocket endpoint ───────────────────────────────────────────────────────

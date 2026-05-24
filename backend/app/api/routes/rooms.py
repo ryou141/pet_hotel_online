@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import List
 from app.database import get_db
 from app.api.deps import get_current_user, get_strict_admin
@@ -9,14 +9,18 @@ from app.schemas.schemas import RoomCreate, RoomUpdate, RoomOut
 router = APIRouter()
 
 
+def _room_query(db):
+    return db.query(Room).options(joinedload(Room.tariff))
+
+
 @router.get("/", response_model=List[RoomOut])
 def get_rooms(db: Session = Depends(get_db)):
-    return db.query(Room).all()
+    return _room_query(db).all()
 
 
 @router.get("/{room_id}", response_model=RoomOut)
 def get_room(room_id: int, db: Session = Depends(get_db)):
-    room = db.query(Room).filter(Room.id == room_id).first()
+    room = _room_query(db).filter(Room.id == room_id).first()
     if not room:
         raise HTTPException(status_code=404, detail="Комната не найдена")
     return room
@@ -29,8 +33,7 @@ def create_room(data: RoomCreate, _: User = Depends(get_strict_admin), db: Sessi
     room = Room(**data.model_dump())
     db.add(room)
     db.commit()
-    db.refresh(room)
-    return room
+    return _room_query(db).filter(Room.id == room.id).first()
 
 
 @router.put("/{room_id}", response_model=RoomOut)
@@ -41,8 +44,7 @@ def update_room(room_id: int, data: RoomUpdate, _: User = Depends(get_strict_adm
     for field, value in data.model_dump(exclude_unset=True).items():
         setattr(room, field, value)
     db.commit()
-    db.refresh(room)
-    return room
+    return _room_query(db).filter(Room.id == room_id).first()
 
 
 @router.delete("/{room_id}", status_code=status.HTTP_204_NO_CONTENT)

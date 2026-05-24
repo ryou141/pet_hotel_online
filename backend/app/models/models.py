@@ -20,7 +20,6 @@ class User(Base):
     date_of_birth = Column(Date)
     role = Column(String(20), default="client")  # client | admin | staff
     is_active = Column(Boolean, default=True)
-    avatar_url = Column(Text)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     pets = relationship("Pet", back_populates="owner", cascade="all, delete-orphan")
@@ -31,7 +30,6 @@ class Staff(Base):
     __tablename__ = "staff"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     first_name = Column(String(100), nullable=False)
     last_name = Column(String(100), nullable=False)
     position = Column(String(100), nullable=False)
@@ -42,6 +40,22 @@ class Staff(Base):
     notes = relationship("StaffNote", back_populates="staff_member")
 
 
+class Tariff(Base):
+    __tablename__ = "tariffs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), nullable=False)
+    description = Column(Text)
+    price_per_day = Column(Numeric(10, 2), nullable=False)
+    features = Column(JSON)
+    is_active = Column(Boolean, default=True)
+    sort_order = Column(Integer, default=0)
+    color = Column(String(20), default="#7A5230")
+    is_featured = Column(Boolean, default=False)
+
+    rooms = relationship("Room", back_populates="tariff")
+
+
 class Room(Base):
     __tablename__ = "rooms"
 
@@ -49,11 +63,12 @@ class Room(Base):
     number = Column(String(20), unique=True, nullable=False)
     type = Column(String(50), nullable=False)  # standard | comfort | vip
     capacity = Column(Integer, default=1)
-    price_per_day = Column(Numeric(10, 2), nullable=False)
+    tariff_id = Column(Integer, ForeignKey("tariffs.id"), nullable=True)
     description = Column(Text)
     is_available = Column(Boolean, default=True)
-    features = Column(JSON)  # list of strings
+    features = Column(JSON)
 
+    tariff = relationship("Tariff", back_populates="rooms")
     camera = relationship("Camera", back_populates="room", uselist=False)
     bookings = relationship("Booking", back_populates="room")
 
@@ -81,7 +96,6 @@ class Pet(Base):
     breed = Column(String(100))
     age = Column(Integer)
     gender = Column(String(10))  # male | female
-    photo_url = Column(Text)
     extra_notes = Column(Text)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
@@ -103,6 +117,8 @@ class Booking(Base):
     total_price = Column(Numeric(10, 2))
     notes = Column(Text)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    extension_date = Column(Date, nullable=True)
+    extension_status = Column(String(20), nullable=True)  # pending | approved | rejected
 
     pet = relationship("Pet", back_populates="bookings")
     room = relationship("Room", back_populates="bookings")
@@ -115,7 +131,6 @@ class Gallery(Base):
     id = Column(Integer, primary_key=True, index=True)
     photo_url = Column(Text, nullable=False)
     caption = Column(String(255))
-    sort_order = Column(Integer, default=0)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
@@ -144,17 +159,3 @@ class VerificationCode(Base):
     expires_at = Column(DateTime, nullable=False)
     used = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-
-
-class Tariff(Base):
-    __tablename__ = "tariffs"
-
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(100), nullable=False)
-    description = Column(Text)
-    price_per_day = Column(Numeric(10, 2), nullable=False)
-    features = Column(JSON)  # list of strings
-    is_active = Column(Boolean, default=True)
-    sort_order = Column(Integer, default=0)
-    color = Column(String(20), default="#E8956D")
-    is_featured = Column(Boolean, default=False)

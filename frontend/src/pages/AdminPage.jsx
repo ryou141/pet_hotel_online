@@ -11,6 +11,7 @@ import StaffManager from '../components/admin/StaffManager'
 import GalleryManager from '../components/admin/GalleryManager'
 import BookingsManager from '../components/admin/BookingsManager'
 import NotesManager from '../components/admin/NotesManager'
+import TariffsManager from '../components/admin/TariffsManager'
 
 export default function AdminPage() {
   const { user } = useAuth()
@@ -30,6 +31,7 @@ export default function AdminPage() {
         <Route path="cameras"  element={isStaff ? <Navigate to="/admin" replace /> : <CamerasManager />} />
         <Route path="staff"    element={isStaff ? <Navigate to="/admin" replace /> : <StaffManager />} />
         <Route path="gallery"  element={isStaff ? <Navigate to="/admin" replace /> : <GalleryManager />} />
+        <Route path="tariffs"  element={isStaff ? <Navigate to="/admin" replace /> : <TariffsManager />} />
       </Routes>
     </AdminLayout>
   )

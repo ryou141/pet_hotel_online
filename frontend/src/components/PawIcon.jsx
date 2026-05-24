@@ -1,0 +1,20 @@
+export default function PawIcon({ size, className = '', style = {} }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 64 64"
+      fill="currentColor"
+      width={size}
+      height={size}
+      className={className}
+      style={style}
+      aria-hidden="true"
+    >
+      <ellipse cx="32" cy="44" rx="14" ry="11" />
+      <ellipse cx="13" cy="29" rx="6.5" ry="9" transform="rotate(-22 13 29)" />
+      <ellipse cx="51" cy="29" rx="6.5" ry="9" transform="rotate(22 51 29)" />
+      <ellipse cx="23" cy="17" rx="6" ry="8" transform="rotate(-8 23 17)" />
+      <ellipse cx="41" cy="17" rx="6" ry="8" transform="rotate(8 41 17)" />
+    </svg>
+  )
+}

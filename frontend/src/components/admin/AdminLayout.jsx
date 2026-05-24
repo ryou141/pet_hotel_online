@@ -5,7 +5,7 @@ import {
   HiOutlineChartBar, HiOutlineCalendarDays, HiOutlineUsers,
   HiOutlineHome, HiOutlineVideoCamera, HiOutlinePhoto,
   HiOutlineDocumentText, HiOutlineArrowLeftOnRectangle,
-  HiOutlineBars3, HiOutlineXMark, HiOutlineUserGroup,
+  HiOutlineBars3, HiOutlineXMark, HiOutlineUserGroup, HiOutlineTag,
 } from 'react-icons/hi2'
 import { MdOutlinePets } from 'react-icons/md'
 import './AdminLayout.css'
@@ -19,6 +19,7 @@ const ADMIN_MENU = [
   { path: '/admin/cameras',  label: 'Камеры',       icon: HiOutlineVideoCamera },
   { path: '/admin/staff',    label: 'Персонал',     icon: HiOutlineUserGroup },
   { path: '/admin/gallery',  label: 'Галерея',      icon: HiOutlinePhoto },
+  { path: '/admin/tariffs',  label: 'Тарифы',       icon: HiOutlineTag },
   { path: '/admin/notes',    label: 'Заметки',      icon: HiOutlineDocumentText },
 ]
 

@@ -4,7 +4,8 @@ from typing import List, Optional
 from app.database import get_db
 from app.api.deps import get_strict_admin, get_current_admin
 from app.models.models import User, Pet, Booking, Room, Camera, Staff, Gallery, StaffNote, Tariff
-from app.schemas.schemas import UserOut, PetOut, BookingOut, RoomOut, GalleryCreate, GalleryOut, StaffNoteOut
+from app.schemas.schemas import UserOut, PetOut, BookingOut, BookingUpdate, RoomOut, GalleryCreate, GalleryOut, StaffNoteOut
+from decimal import Decimal
 
 router = APIRouter()
 
@@ -125,7 +126,7 @@ def update_booking_status(
     if status not in valid:
         raise HTTPException(status_code=400, detail="Недопустимый статус")
     booking.status = status
-    if status == "active":
+    if status == "confirmed":
         room = db.query(Room).filter(Room.id == booking.room_id).first()
         if room:
             room.is_available = False
@@ -133,6 +134,64 @@ def update_booking_status(
         room = db.query(Room).filter(Room.id == booking.room_id).first()
         if room:
             room.is_available = True
+    db.commit()
+    return {"ok": True}
+
+
+@router.put("/bookings/{booking_id}", response_model=BookingOut)
+def admin_edit_booking(
+    booking_id: int,
+    data: BookingUpdate,
+    _: User = Depends(get_strict_admin),
+    db: Session = Depends(get_db),
+):
+    booking = db.query(Booking).options(
+        joinedload(Booking.pet), joinedload(Booking.room), joinedload(Booking.owner)
+    ).filter(Booking.id == booking_id).first()
+    if not booking:
+        raise HTTPException(status_code=404, detail="Бронирование не найдено")
+
+    updates = data.model_dump(exclude_unset=True)
+    for field, value in updates.items():
+        setattr(booking, field, value)
+
+    if "check_in_date" in updates or "check_out_date" in updates or "room_id" in updates:
+        room = db.query(Room).options(joinedload(Room.tariff)).filter(Room.id == booking.room_id).first()
+        if room and room.tariff:
+            days = (booking.check_out_date - booking.check_in_date).days
+            booking.total_price = Decimal(str(room.tariff.price_per_day)) * days
+
+    db.commit()
+    return db.query(Booking).options(
+        joinedload(Booking.pet), joinedload(Booking.room), joinedload(Booking.owner)
+    ).filter(Booking.id == booking_id).first()
+
+
+@router.put("/bookings/{booking_id}/extension")
+def handle_extension(
+    booking_id: int,
+    action: str,
+    _: User = Depends(get_strict_admin),
+    db: Session = Depends(get_db),
+):
+    if action not in ("approve", "reject"):
+        raise HTTPException(status_code=400, detail="action должен быть approve или reject")
+    booking = db.query(Booking).options(joinedload(Booking.room)).filter(Booking.id == booking_id).first()
+    if not booking:
+        raise HTTPException(status_code=404, detail="Бронирование не найдено")
+    if booking.extension_status != "pending":
+        raise HTTPException(status_code=400, detail="Нет активной заявки на продление")
+
+    if action == "approve":
+        room = db.query(Room).options(joinedload(Room.tariff)).filter(Room.id == booking.room_id).first()
+        booking.check_out_date = booking.extension_date
+        if room and room.tariff:
+            days = (booking.check_out_date - booking.check_in_date).days
+            booking.total_price = Decimal(str(room.tariff.price_per_day)) * days
+        booking.extension_status = "approved"
+    else:
+        booking.extension_status = "rejected"
+
     db.commit()
     return {"ok": True}
 

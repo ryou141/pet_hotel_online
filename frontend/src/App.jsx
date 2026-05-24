@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import PawIcon from './components/PawIcon'
 import LandingPage from './pages/LandingPage'
 import CabinetPage from './pages/CabinetPage'
 import AdminPage from './pages/AdminPage'
@@ -7,13 +8,13 @@ import DocsPage from './pages/DocsPage'
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth()
-  if (loading) return <div className="page-loader"><div className="paw-loader">🐾</div></div>
+  if (loading) return <div className="page-loader"><div className="paw-loader"><PawIcon size={48} /></div></div>
   return user ? children : <Navigate to="/" replace />
 }
 
 function AdminRoute({ children }) {
   const { user, loading } = useAuth()
-  if (loading) return <div className="page-loader"><div className="paw-loader">🐾</div></div>
+  if (loading) return <div className="page-loader"><div className="paw-loader"><PawIcon size={48} /></div></div>
   if (!user) return <Navigate to="/" replace />
   if (user.role !== 'admin' && user.role !== 'staff') return <Navigate to="/cabinet" replace />
   return children

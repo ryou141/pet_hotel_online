@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import AuthModal from './AuthModal'
 import { HiOutlineUser, HiOutlineArrowRightOnRectangle, HiOutlineArrowLeftOnRectangle } from 'react-icons/hi2'
+import PawIcon from './PawIcon'
 import './Header.css'
 
 const NAV_LINKS = [
@@ -55,7 +56,7 @@ export default function Header() {
         <div className="header-pill">
           {/* Logo */}
           <div className="header-logo" onClick={() => navigate('/')}>
-            <span className="header-logo-icon">🐾</span>
+            <PawIcon size={22} className="header-logo-icon" />
             <span className="header-logo-text">PawHotel</span>
           </div>
 

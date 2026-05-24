@@ -11,7 +11,7 @@ router = APIRouter()
 
 @router.get("/", response_model=List[GalleryOut])
 def get_gallery(db: Session = Depends(get_db)):
-    return db.query(Gallery).filter(Gallery.is_active == True).order_by(Gallery.sort_order).all()
+    return db.query(Gallery).filter(Gallery.is_active == True).order_by(Gallery.id).all()
 
 
 @router.post("/", response_model=GalleryOut, status_code=status.HTTP_201_CREATED)

@@ -33,11 +33,9 @@ def get_pet_notes(pet_id: int, current_user: User = Depends(get_current_user), d
 
 @router.post("/", response_model=StaffNoteOut, status_code=status.HTTP_201_CREATED)
 def create_note(data: StaffNoteCreate, current_user: User = Depends(get_current_admin), db: Session = Depends(get_db)):
-    from app.models.models import Staff
-    staff = db.query(Staff).filter(Staff.user_id == current_user.id).first()
     note = StaffNote(
         pet_id=data.pet_id,
-        staff_id=staff.id if staff else None,
+        staff_id=None,
         content=data.content,
         is_public=data.is_public,
     )

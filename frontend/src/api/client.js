@@ -79,6 +79,7 @@ export const bookingsApi = {
   list: () => api.get('/api/bookings/'),
   create: (d) => api.post('/api/bookings/', d),
   update: (id, d) => api.put(`/api/bookings/${id}`, d),
+  extend: (id, extension_date) => api.post(`/api/bookings/${id}/extend`, { extension_date }),
   cancel: (id) => api.delete(`/api/bookings/${id}`),
 }
 
@@ -125,6 +126,8 @@ export const adminApi = {
   allPets: (search) => api.get('/api/admin/pets', { params: { search } }),
   allBookings: (status, search) => api.get('/api/admin/bookings', { params: { status, search } }),
   updateBookingStatus: (id, status) => api.put(`/api/admin/bookings/${id}/status`, null, { params: { status } }),
+  editBooking: (id, d) => api.put(`/api/admin/bookings/${id}`, d),
+  handleExtension: (id, action) => api.put(`/api/admin/bookings/${id}/extension`, null, { params: { action } }),
   addGallery: (d) => api.post('/api/admin/gallery', d),
   allNotes: (petId) => api.get('/api/admin/notes', { params: { pet_id: petId } }),
 }

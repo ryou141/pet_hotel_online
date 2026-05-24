@@ -3,6 +3,7 @@ import AuthModal from '../AuthModal'
 import { useAuth } from '../../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { HiOutlineTrophy } from 'react-icons/hi2'
+import PawIcon from '../PawIcon'
 import { MdOutlinePets } from 'react-icons/md'
 import './Hero.css'
 
@@ -24,8 +25,8 @@ export default function Hero() {
         </div>
 
         {/* Decorative paws */}
-        <span className="hero-paw hero-paw-1">🐾</span>
-        <span className="hero-paw hero-paw-2">🐾</span>
+        <PawIcon className="hero-paw hero-paw-1" />
+        <PawIcon className="hero-paw hero-paw-2" />
 
         <div className="container hero-content">
 

@@ -37,7 +37,7 @@
   cursor: pointer;
   flex-shrink: 0;
 }
-.header-logo-icon { font-size: 1.4rem; }
+.header-logo-icon { display: flex; align-items: center; color: var(--primary); }
 .header-logo-text {
   font-size: 1.1rem;
   font-weight: 800;

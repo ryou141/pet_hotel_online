@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { petsApi, bookingsApi, usersApi } from '../api/client'
 import Header from '../components/Header'
+import PawIcon from '../components/PawIcon'
 import Footer from '../components/Footer'
 import PetCard from '../components/cabinet/PetCard'
 import { HiOutlineEnvelope, HiOutlinePhone, HiOutlineCalendarDays, HiOutlineUser } from 'react-icons/hi2'
@@ -75,7 +76,7 @@ export default function CabinetPage() {
     try {
       await petsApi.create({ ...petForm, age: petForm.age ? Number(petForm.age) : null })
       setAddingPet(false)
-      setPetForm({ name: '', species: 'dog', breed: '', age: '', gender: '', photo_url: '' })
+      setPetForm({ name: '', species: 'dog', breed: '', age: '', gender: '' })
       loadData()
       refreshUser()
     } catch (err) {
@@ -185,7 +186,7 @@ export default function CabinetPage() {
 
               {pets.length === 0 && !addingPet ? (
                 <div className="empty-pets">
-                  <span>🐾</span>
+                  <PawIcon size={64} style={{ color: 'var(--primary-light)', display: 'block', margin: '0 auto' }} />
                   <h3>Питомцев пока нет</h3>
                   <p>Добавьте вашего питомца, чтобы забронировать для него место в отеле</p>
                   <button className="btn btn-primary" onClick={() => setAddingPet(true)}>Добавить питомца</button>

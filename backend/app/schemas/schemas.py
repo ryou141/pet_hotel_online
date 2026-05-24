@@ -79,7 +79,6 @@ class UserBase(BaseModel):
     middle_name: Optional[str] = None
     phone: Optional[str] = None
     date_of_birth: Optional[date] = None
-    avatar_url: Optional[str] = None
 
 
 class UserUpdate(BaseModel):
@@ -88,7 +87,6 @@ class UserUpdate(BaseModel):
     middle_name: Optional[str] = None
     phone: Optional[str] = None
     date_of_birth: Optional[date] = None
-    avatar_url: Optional[str] = None
 
 
 class UserOut(UserBase):
@@ -133,13 +131,48 @@ class StaffOut(StaffBase):
         from_attributes = True
 
 
+# ─── Tariff ──────────────────────────────────────────────────────────────────
+
+class TariffBase(BaseModel):
+    name: str
+    description: Optional[str] = None
+    price_per_day: Decimal
+    features: Optional[List[str]] = None
+    is_active: bool = True
+    sort_order: int = 0
+    color: str = "#7A5230"
+    is_featured: bool = False
+
+
+class TariffCreate(TariffBase):
+    pass
+
+
+class TariffUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    price_per_day: Optional[Decimal] = None
+    features: Optional[List[str]] = None
+    is_active: Optional[bool] = None
+    sort_order: Optional[int] = None
+    color: Optional[str] = None
+    is_featured: Optional[bool] = None
+
+
+class TariffOut(TariffBase):
+    id: int
+
+    class Config:
+        from_attributes = True
+
+
 # ─── Room ────────────────────────────────────────────────────────────────────
 
 class RoomBase(BaseModel):
     number: str
     type: str
     capacity: int = 1
-    price_per_day: Decimal
+    tariff_id: Optional[int] = None
     description: Optional[str] = None
     is_available: bool = True
     features: Optional[List[str]] = None
@@ -153,7 +186,7 @@ class RoomUpdate(BaseModel):
     number: Optional[str] = None
     type: Optional[str] = None
     capacity: Optional[int] = None
-    price_per_day: Optional[Decimal] = None
+    tariff_id: Optional[int] = None
     description: Optional[str] = None
     is_available: Optional[bool] = None
     features: Optional[List[str]] = None
@@ -161,6 +194,7 @@ class RoomUpdate(BaseModel):
 
 class RoomOut(RoomBase):
     id: int
+    tariff: Optional[TariffOut] = None
 
     class Config:
         from_attributes = True
@@ -203,7 +237,6 @@ class PetBase(BaseModel):
     breed: Optional[str] = None
     age: Optional[int] = None
     gender: Optional[str] = None
-    photo_url: Optional[str] = None
     extra_notes: Optional[str] = None
 
 
@@ -217,7 +250,6 @@ class PetUpdate(BaseModel):
     breed: Optional[str] = None
     age: Optional[int] = None
     gender: Optional[str] = None
-    photo_url: Optional[str] = None
     extra_notes: Optional[str] = None
 
 
@@ -245,8 +277,11 @@ class BookingUpdate(BaseModel):
     room_id: Optional[int] = None
     check_in_date: Optional[date] = None
     check_out_date: Optional[date] = None
-    status: Optional[str] = None
     notes: Optional[str] = None
+
+
+class BookingExtendRequest(BaseModel):
+    extension_date: date
 
 
 class OwnerBrief(BaseModel):
@@ -270,6 +305,8 @@ class BookingOut(BaseModel):
     total_price: Optional[Decimal]
     notes: Optional[str]
     created_at: datetime
+    extension_date: Optional[date] = None
+    extension_status: Optional[str] = None
     pet: Optional[PetOut] = None
     room: Optional[RoomOut] = None
     owner: Optional[OwnerBrief] = None
@@ -283,7 +320,6 @@ class BookingOut(BaseModel):
 class GalleryBase(BaseModel):
     photo_url: str
     caption: Optional[str] = None
-    sort_order: int = 0
     is_active: bool = True
 
 
@@ -294,7 +330,6 @@ class GalleryCreate(GalleryBase):
 class GalleryUpdate(BaseModel):
     photo_url: Optional[str] = None
     caption: Optional[str] = None
-    sort_order: Optional[int] = None
     is_active: Optional[bool] = None
 
 
@@ -327,41 +362,6 @@ class StaffNoteOut(BaseModel):
     is_public: bool
     created_at: datetime
     staff_member: Optional[StaffOut] = None
-
-    class Config:
-        from_attributes = True
-
-
-# ─── Tariff ──────────────────────────────────────────────────────────────────
-
-class TariffBase(BaseModel):
-    name: str
-    description: Optional[str] = None
-    price_per_day: Decimal
-    features: Optional[List[str]] = None
-    is_active: bool = True
-    sort_order: int = 0
-    color: str = "#E8956D"
-    is_featured: bool = False
-
-
-class TariffCreate(TariffBase):
-    pass
-
-
-class TariffUpdate(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    price_per_day: Optional[Decimal] = None
-    features: Optional[List[str]] = None
-    is_active: Optional[bool] = None
-    sort_order: Optional[int] = None
-    color: Optional[str] = None
-    is_featured: Optional[bool] = None
-
-
-class TariffOut(TariffBase):
-    id: int
 
     class Config:
         from_attributes = True
