@@ -46,6 +46,7 @@
 }
 
 .adv-text {
+  display: block !important;
   font-size: 0.88rem;
   line-height: 1.65;
   color: var(--text-secondary);

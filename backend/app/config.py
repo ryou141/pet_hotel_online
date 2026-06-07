@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     SMTP_USER: str = ""
     SMTP_PASSWORD: str = ""
     SMTP_FROM: str = ""
+    RESEND_API_KEY: str = ""
+    RESEND_FROM: str = ""
 
     class Config:
         env_file = ".env"

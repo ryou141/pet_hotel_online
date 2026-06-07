@@ -134,13 +134,15 @@
 }
 
 @media (max-width: 768px) {
-  .contacts-map { height: 500px; }
+  .contacts-map { height: auto; padding: 0 16px 40px; }
+  .contacts-map iframe { display: none; }
+  .map-overlay { display: none; }
   .contacts-card {
     position: static;
     transform: none;
     width: 100%;
-    border-radius: 0;
-    border-top: none;
+    border-radius: var(--radius-lg);
+    margin: 0 auto;
+    box-sizing: border-box;
   }
-  .map-overlay { display: none; }
 }

@@ -102,6 +102,7 @@ class Pet(Base):
     owner = relationship("User", back_populates="pets")
     bookings = relationship("Booking", back_populates="pet", cascade="all, delete-orphan")
     staff_notes = relationship("StaffNote", back_populates="pet", cascade="all, delete-orphan")
+    activity_logs = relationship("PetActivityLog", back_populates="pet", cascade="all, delete-orphan")
 
 
 class Booking(Base):
@@ -159,3 +160,16 @@ class VerificationCode(Base):
     expires_at = Column(DateTime, nullable=False)
     used = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class PetActivityLog(Base):
+    __tablename__ = "pet_activity_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    pet_id = Column(Integer, ForeignKey("pets.id"), nullable=False)
+    booking_id = Column(Integer, ForeignKey("bookings.id"), nullable=True)
+    state = Column(String(20), nullable=False)  # lying | sitting | standing | moving | unknown
+    confidence = Column(Numeric(4, 2))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    pet = relationship("Pet", back_populates="activity_logs")

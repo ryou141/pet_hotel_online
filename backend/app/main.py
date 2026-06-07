@@ -4,10 +4,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.database import engine
 from app.models.models import Base
-from app.api.routes import auth, users, pets, rooms, bookings, staff, cameras, gallery, tariffs, notes, admin
+from app.api.routes import auth, users, pets, rooms, bookings, staff, cameras, gallery, tariffs, notes, admin, activity
 from app.cv.detector import router as cv_router
 from app.cv.auto_notes import cv_auto_notes_loop
 from app.cv.daily_report import daily_report_loop
+from app.cv.activity_monitor import activity_monitor_loop
 from app.core.security import get_password_hash
 from sqlalchemy.orm import Session
 from app.database import SessionLocal
@@ -40,6 +41,7 @@ async def lifespan(app: FastAPI):
     create_initial_admin()
     asyncio.create_task(cv_auto_notes_loop(interval_minutes=30))
     asyncio.create_task(daily_report_loop(hour=20))
+    asyncio.create_task(activity_monitor_loop(interval_seconds=10))
     yield
 
 
@@ -69,6 +71,7 @@ app.include_router(gallery.router, prefix="/api/gallery", tags=["Галерея"
 app.include_router(tariffs.router, prefix="/api/tariffs", tags=["Тарифы"])
 app.include_router(notes.router, prefix="/api/notes", tags=["Заметки"])
 app.include_router(admin.router, prefix="/api/admin", tags=["Админ"])
+app.include_router(activity.router, prefix="/api/activity", tags=["Активность"])
 
 
 app.include_router(cv_router, tags=["CV Детекция"])

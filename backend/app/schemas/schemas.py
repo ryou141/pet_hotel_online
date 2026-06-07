@@ -365,3 +365,17 @@ class StaffNoteOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# ─── Pet Activity Log ─────────────────────────────────────────────────────────
+
+class PetActivityLogOut(BaseModel):
+    id: int
+    pet_id: int
+    booking_id: Optional[int]
+    state: str
+    confidence: Optional[Decimal]
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

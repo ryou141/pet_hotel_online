@@ -120,6 +120,8 @@
 @media (max-width: 900px) {
   .header-nav { display: none; }
   .burger { display: flex; }
+  .header-actions { margin-left: auto; }
+  .header-user-btn { display: none !important; }
 }
 
 @media (max-width: 480px) {

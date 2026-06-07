@@ -2,6 +2,7 @@
   background: linear-gradient(160deg, var(--primary-ultra) 0%, var(--bg) 100%);
 }
 
+/* ── Desktop flip cards ─────────────────────────────────── */
 .checkin-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -83,15 +84,65 @@
 }
 .checkin-full {
   font-size: 0.84rem;
-  color: rgba(255,255,255,0.85);
   line-height: 1.7;
   white-space: pre-line;
 }
+.checkin-back .checkin-full {
+  color: rgba(255,255,255,0.85);
+}
+
+/* ── Mobile accordion ───────────────────────────────────── */
+.checkin-desktop  { display: grid; }
+.checkin-accordion { display: none; }
 
 @media (max-width: 900px) {
-  .checkin-grid { grid-template-columns: 1fr; }
-  .checkin-card { height: auto; perspective: none; }
-  .checkin-front { position: static; transform: none !important; padding-bottom: 0; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
-  .checkin-back { position: static; transform: none !important; border-radius: 0 0 var(--radius-lg) var(--radius-lg); padding-top: 24px; }
-  .checkin-hover-hint { display: none; }
+  .checkin-desktop  { display: none; }
+  .checkin-accordion { display: flex; flex-direction: column; gap: 12px; }
+
+  .checkin-item {
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--bg-card);
+    overflow: hidden;
+  }
+
+  .checkin-item-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .checkin-item-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .checkin-chevron {
+    color: var(--text-secondary);
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+  }
+  .checkin-chevron.open { transform: rotate(180deg); }
+
+  .checkin-item-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease;
+  }
+  .checkin-item-body.open { max-height: 600px; }
+
+  .checkin-item-body .checkin-full {
+    padding: 0 20px 20px;
+    color: var(--text-secondary);
+  }
 }

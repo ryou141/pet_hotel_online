@@ -1,16 +1,16 @@
 """
 Animal state detector — WebSocket endpoint.
 
-Accepts base64-encoded JPEG frames from the frontend, runs YOLOv8-pose
+Accepts base64-encoded JPEG frames from the frontend, runs YOLO26-pose
 inference, and returns the detected dog state back over the same socket.
 
 Place your trained weights at: backend/app/cv/dog_pose.pt
 If the file is missing, the module returns state="unknown" for all requests.
 
 States:
-  lying   — питомец лежит      (YOLO class 0: Lie-Down)
-  sitting — питомец сидит      (YOLO class 1: SIT)
-  standing— питомец стоит      (YOLO class 2: Stand-UP)
+  lying   — питомец лежит      (YOLO class: Lie-Down)
+  sitting — питомец сидит      (YOLO class: SIT)
+  standing— питомец стоит      (YOLO class: Stand-UP)
   moving  — питомец активен    (определяется по скелету)
   unknown — не удалось определить
 """
@@ -40,86 +40,25 @@ def _load_model():
     if _model is not None:
         return _model
     if not WEIGHTS_PATH.exists():
-        logger.warning("YOLOv8 weights not found at %s — using heuristic fallback", WEIGHTS_PATH)
+        logger.warning("YOLO weights not found at %s — returning unknown for all requests", WEIGHTS_PATH)
         return None
     try:
         from ultralytics import YOLO
         _model = YOLO(str(WEIGHTS_PATH))
-        logger.info("YOLOv8 model loaded from %s", WEIGHTS_PATH)
+        logger.info("YOLO model loaded from %s", WEIGHTS_PATH)
         return _model
     except Exception as exc:
         logger.error("Failed to load YOLO model: %s", exc)
         return None
 
 
-# ─── YOLO class → state mapping ───────────────────────────────────────────────
+# ─── Class name → state mapping ───────────────────────────────────────────────
 
-_CLASS_STATE = {
-    0: ("lying",    "Лежит"),
-    1: ("sitting",  "Сидит"),
-    2: ("standing", "Стоит"),
+_NAME_STATE = {
+    "lie-down": ("lying",    "Лежит"),
+    "sit":      ("sitting",  "Сидит"),
+    "stand-up": ("standing", "Стоит"),
 }
-
-# ─── Keypoint-based pose classifier (from Colab) ─────────────────────────────
-
-def _get_angle(p1, p2, p3):
-    if any(p is None for p in [p1, p2, p3]):
-        return None
-    v1 = np.array(p1) - np.array(p2)
-    v2 = np.array(p3) - np.array(p2)
-    cos_a = np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2) + 1e-6)
-    return float(np.degrees(np.arccos(np.clip(cos_a, -1, 1))))
-
-
-def _classify_by_keypoints(kps, conf_threshold: float = 0.3):
-    """
-    Refines YOLO class using keypoint geometry.
-    Returns (state, confidence).
-    kps: np.ndarray of shape (N, 3) — x, y, visibility
-    """
-    def get_kp(idx):
-        if idx < len(kps) and kps[idx][2] > conf_threshold:
-            return (float(kps[idx][0]), float(kps[idx][1]))
-        return None
-
-    # 24-keypoint layout from Colab
-    # 0=nose, 5=throat, 6=tail_base, 7=l_shoulder, 8=l_elbow, 9=l_wrist
-    # 10=r_shoulder, 11=r_elbow, 12=r_wrist, 13=l_hip, 14=l_knee, 15=l_ankle
-    # 16=r_hip, 17=r_knee, 18=r_ankle
-
-    l_shoulder = get_kp(7)
-    r_shoulder = get_kp(10)
-    l_hip      = get_kp(13)
-    r_hip      = get_kp(16)
-    l_knee     = get_kp(14)
-    r_knee     = get_kp(17)
-    l_ankle    = get_kp(15)
-    r_ankle    = get_kp(18)
-    l_elbow    = get_kp(8)
-    nose       = get_kp(0)
-
-    shoulder_y = l_shoulder[1] if l_shoulder else (r_shoulder[1] if r_shoulder else None)
-    hip_y      = l_hip[1]      if l_hip      else (r_hip[1]      if r_hip      else None)
-
-    # Horizontal body → lying
-    if shoulder_y and hip_y and abs(shoulder_y - hip_y) < 30:
-        return "lying", 0.88
-
-    # Bent rear legs + straight front → sitting
-    back_angle  = _get_angle(l_hip, l_knee, l_ankle)
-    front_angle = _get_angle(l_shoulder, l_elbow, get_kp(9))
-    if back_angle and 60 < back_angle < 120:
-        if front_angle is None or front_angle > 140:
-            return "sitting", 0.82
-
-    # Wide leg spread + nose above knees → moving/running
-    if l_ankle and r_ankle and l_knee and r_knee and nose:
-        leg_spread = abs(l_ankle[0] - r_ankle[0])
-        knee_y_avg = (l_knee[1] + r_knee[1]) / 2
-        if leg_spread > 80 and nose[1] < knee_y_avg:
-            return "moving", 0.75
-
-    return "standing", 0.72
 
 
 # ─── Frame helpers ────────────────────────────────────────────────────────────
@@ -150,33 +89,20 @@ def _run_yolo(frame: np.ndarray) -> dict:
         if result.boxes is None or len(result.boxes) == 0:
             return {"state": "unknown", "confidence": 0.0, "label": "Не определено"}
 
-        # Pick box with highest confidence among valid classes
-        best_conf, best_cls, best_kps = 0.0, None, None
-        has_keypoints = result.keypoints is not None
-
-        for i, box in enumerate(result.boxes):
-            cls  = int(box.cls[0])
+        # Pick detection with highest confidence
+        best_conf, best_state, best_label = 0.0, None, None
+        for box in result.boxes:
             conf = float(box.conf[0])
-            if cls in _CLASS_STATE and conf > best_conf:
-                best_conf = conf
-                best_cls  = cls
-                if has_keypoints:
-                    best_kps = result.keypoints.data.cpu().numpy()[i]
+            cls  = int(box.cls[0])
+            class_name = model.names.get(cls, "").lower()
+            if conf > best_conf and class_name in _NAME_STATE:
+                best_conf  = conf
+                best_state, best_label = _NAME_STATE[class_name]
 
-        if best_cls is None:
+        if best_state is None:
             return {"state": "unknown", "confidence": 0.0, "label": "Не определено"}
 
-        # Refine with keypoints if available
-        if best_kps is not None and len(best_kps) >= 17:
-            state, confidence = _classify_by_keypoints(best_kps)
-        else:
-            state, _ = _CLASS_STATE[best_cls]
-            confidence = best_conf
-
-        label = {"lying": "Лежит", "sitting": "Сидит", "standing": "Стоит",
-                 "moving": "Активен", "unknown": "Не определено"}.get(state, "Не определено")
-
-        return {"state": state, "confidence": round(confidence, 2), "label": label}
+        return {"state": best_state, "confidence": round(best_conf, 2), "label": best_label}
 
     except Exception as exc:
         logger.error("YOLO inference error: %s", exc)
@@ -193,7 +119,6 @@ async def detect_animal_state(websocket: WebSocket):
     """
     await websocket.accept()
     logger.info("CV WebSocket connected")
-    # Pre-load model on first connection
     _load_model()
 
     try:

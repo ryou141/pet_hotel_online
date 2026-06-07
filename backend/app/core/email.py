@@ -6,8 +6,27 @@ from email.mime.multipart import MIMEMultipart
 from app.config import settings
 
 
+def _resend_send(to_email: str, subject: str, body_html: str) -> None:
+    import httpx
+    response = httpx.post(
+        "https://api.resend.com/emails",
+        headers={
+            "Authorization": f"Bearer {settings.RESEND_API_KEY}",
+            "Content-Type": "application/json",
+        },
+        json={
+            "from": settings.RESEND_FROM,
+            "to": [to_email],
+            "subject": subject,
+            "html": body_html,
+        },
+        timeout=15,
+    )
+    if response.status_code >= 400:
+        raise Exception(f"Resend error {response.status_code}: {response.text}")
+
+
 def _smtp_send(to_email: str, subject: str, body_html: str) -> None:
-    """Low-level SMTP sender. Prints to console if SMTP not configured."""
     if not settings.SMTP_USER or not settings.SMTP_PASSWORD:
         print(f"\n{'='*50}\n  EMAIL TO: {to_email}\n  SUBJECT: {subject}\n{'='*50}\n")
         return
@@ -21,6 +40,13 @@ def _smtp_send(to_email: str, subject: str, body_html: str) -> None:
         server.ehlo(); server.starttls(context=context)
         server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
         server.sendmail(msg["From"], to_email, msg.as_string())
+
+
+def _send(to_email: str, subject: str, body_html: str) -> None:
+    if settings.RESEND_API_KEY:
+        _resend_send(to_email, subject, body_html)
+    else:
+        _smtp_send(to_email, subject, body_html)
 
 
 def send_code_email(to_email: str, code: str, type: str) -> None:
@@ -38,17 +64,13 @@ def send_code_email(to_email: str, code: str, type: str) -> None:
     </div>
     """
     try:
-        _smtp_send(to_email, subject, body_html)
+        _send(to_email, subject, body_html)
     except Exception as e:
         print(f"Email send error: {e}")
         raise
 
 
 def send_daily_report_email(to_email: str, owner, pet_entries: list, report_date: date) -> None:
-    """
-    Send a daily notes digest to a pet owner.
-    pet_entries: list of (Pet, [StaffNote])
-    """
     date_str = report_date.strftime("%d.%m.%Y")
     subject  = f"Отчёт о ваших питомцах за {date_str} — PawHotel"
 
@@ -83,4 +105,4 @@ def send_daily_report_email(to_email: str, owner, pet_entries: list, report_date
       <p style="color:#6B5444;font-size:0.82rem;">Это автоматическое письмо от системы наблюдения PawHotel.</p>
     </div>
     """
-    _smtp_send(to_email, subject, body_html)
+    _send(to_email, subject, body_html)

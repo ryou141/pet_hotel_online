@@ -118,6 +118,11 @@ export const notesApi = {
   delete: (id) => api.delete(`/api/notes/${id}`),
 }
 
+export const activityApi = {
+  petActivity: (petId, limit = 100) => api.get(`/api/activity/pet/${petId}`, { params: { limit } }),
+  petSummary:  (petId, hours = 1)   => api.get(`/api/activity/pet/${petId}/summary`, { params: { hours } }),
+}
+
 export const adminApi = {
   dashboard: () => api.get('/api/admin/dashboard'),
   users: (search) => api.get('/api/admin/users', { params: { search } }),

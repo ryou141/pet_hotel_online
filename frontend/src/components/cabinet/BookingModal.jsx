@@ -32,7 +32,9 @@ export default function BookingModal({ pet, onClose, onSuccess }) {
   const nights = (checkIn && checkOut && checkOut > checkIn)
     ? Math.ceil((checkOut - checkIn) / 86400000)
     : null
-  const price = nights && selectedRoom ? nights * Number(selectedRoom.price_per_day) : null
+  const price = nights && selectedRoom?.tariff?.price_per_day
+    ? nights * Number(selectedRoom.tariff.price_per_day)
+    : null
 
   async function submit(e) {
     e.preventDefault()
@@ -97,7 +99,7 @@ export default function BookingModal({ pet, onClose, onSuccess }) {
               <option value="">— выберите комнату —</option>
               {rooms.map(r => (
                 <option key={r.id} value={r.id}>
-                  №{r.number} · {r.type} · {Number(r.price_per_day).toLocaleString('ru')} ₽/ночь
+                  №{r.number} · {r.type}{r.tariff?.price_per_day ? ` · ${Number(r.tariff.price_per_day).toLocaleString('ru')} ₽/ночь` : ''}
                 </option>
               ))}
             </select>

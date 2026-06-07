@@ -1,4 +1,5 @@
-import { HiOutlineCalendarDays, HiOutlineShoppingBag } from 'react-icons/hi2'
+import { useState } from 'react'
+import { HiOutlineCalendarDays, HiOutlineShoppingBag, HiChevronDown } from 'react-icons/hi2'
 import { MdOutlinePets } from 'react-icons/md'
 import './HowToCheckIn.css'
 
@@ -24,6 +25,12 @@ const STEPS = [
 ]
 
 export default function HowToCheckIn() {
+  const [openIndex, setOpenIndex] = useState(null)
+
+  function toggle(i) {
+    setOpenIndex(openIndex === i ? null : i)
+  }
+
   return (
     <section className="checkin-section section" id="checkin">
       <div className="container">
@@ -34,7 +41,8 @@ export default function HowToCheckIn() {
           Наведите на карточку, чтобы узнать подробности.
         </p>
 
-        <div className="checkin-grid">
+        {/* Desktop: flip cards */}
+        <div className="checkin-grid checkin-desktop">
           {STEPS.map((step, i) => (
             <div key={i} className="checkin-card">
               <div className="checkin-front">
@@ -46,6 +54,27 @@ export default function HowToCheckIn() {
               <div className="checkin-back">
                 <div className="checkin-back-icon"><step.Icon size={28} /></div>
                 <h3 className="checkin-back-title">{step.title}</h3>
+                <p className="checkin-full">{step.full}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Mobile: accordion */}
+        <div className="checkin-accordion">
+          {STEPS.map((step, i) => (
+            <div key={i} className="checkin-item">
+              <button className="checkin-item-header" onClick={() => toggle(i)}>
+                <div className="checkin-item-left">
+                  <step.Icon size={22} />
+                  <span>{step.title}</span>
+                </div>
+                <HiChevronDown
+                  size={20}
+                  className={`checkin-chevron ${openIndex === i ? 'open' : ''}`}
+                />
+              </button>
+              <div className={`checkin-item-body ${openIndex === i ? 'open' : ''}`}>
                 <p className="checkin-full">{step.full}</p>
               </div>
             </div>

@@ -2,11 +2,10 @@ import { useState } from 'react'
 import { petsApi, notesApi, bookingsApi } from '../../api/client'
 import BookingModal from './BookingModal'
 import PetStream from './PetStream'
-import CvTestPanel from './CvTestPanel'
 import { MdOutlinePets } from 'react-icons/md'
 import {
   HiOutlineCalendarDays, HiOutlinePencil, HiOutlineDocumentText,
-  HiOutlineTrash, HiOutlineHome, HiOutlineClock, HiOutlineCpuChip,
+  HiOutlineTrash, HiOutlineHome, HiOutlineClock,
   HiOutlineXMark, HiOutlinePencilSquare,
 } from 'react-icons/hi2'
 import './PetCard.css'
@@ -23,7 +22,6 @@ export default function PetCard({ pet, bookings, onRefresh }) {
   const [notes, setNotes]                   = useState(null)
   const [notesOpen, setNotesOpen]           = useState(false)
   const [loading, setLoading]               = useState(false)
-  const [cvTestOpen, setCvTestOpen]         = useState(false)
   const [editBookingOpen, setEditBookingOpen] = useState(false)
   const [editForm, setEditForm]             = useState({})
   const [editLoading, setEditLoading]       = useState(false)
@@ -145,7 +143,7 @@ export default function PetCard({ pet, bookings, onRefresh }) {
               <div className="grid-2" style={{ gap: 8 }}>
                 <input className="form-control" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Кличка" required />
                 <select className="form-control" value={form.species} onChange={e => setForm({ ...form, species: e.target.value })}>
-                  {Object.entries(SPECIES_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                  <option value="dog">Собака</option>
                 </select>
                 <input className="form-control" value={form.breed || ''} onChange={e => setForm({ ...form, breed: e.target.value })} placeholder="Порода" />
                 <input className="form-control" type="number" value={form.age || ''} onChange={e => setForm({ ...form, age: e.target.value })} placeholder="Возраст (лет)" />
@@ -189,9 +187,6 @@ export default function PetCard({ pet, bookings, onRefresh }) {
                 <button className="btn btn-ghost btn-sm" onClick={loadNotes}>
                   <HiOutlineDocumentText size={14} /> Заметки
                 </button>
-                <button className="btn btn-ghost btn-sm" onClick={() => setCvTestOpen(v => !v)}>
-                  <HiOutlineCpuChip size={14} /> Тест CV
-                </button>
                 <button className="btn btn-ghost btn-sm" style={{ color: 'var(--error)' }} onClick={deletePet}>
                   <HiOutlineTrash size={14} />
                 </button>
@@ -231,10 +226,6 @@ export default function PetCard({ pet, bookings, onRefresh }) {
             </div>
           )}
         </div>
-      )}
-
-      {cvTestOpen && (
-        <CvTestPanel petId={pet.id} />
       )}
 
       {bookingOpen && (

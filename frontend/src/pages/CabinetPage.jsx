@@ -257,10 +257,6 @@ export default function CabinetPage() {
                   <label>Вид *</label>
                   <select className="form-control" value={petForm.species} onChange={e => setPetForm({ ...petForm, species: e.target.value })}>
                     <option value="dog">Собака</option>
-                    <option value="cat">Кошка</option>
-                    <option value="rabbit">Кролик</option>
-                    <option value="bird">Птица</option>
-                    <option value="other">Другое</option>
                   </select>
                 </div>
                 <div className="form-group">
