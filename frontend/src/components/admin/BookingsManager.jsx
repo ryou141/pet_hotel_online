@@ -2,6 +2,12 @@ import { useState, useEffect } from 'react'
 import { adminApi } from '../../api/client'
 import { HiOutlineHeart, HiOutlinePencilSquare, HiOutlineCheck, HiOutlineXMark } from 'react-icons/hi2'
 
+const ACTIVITY_LEVELS = [
+  { value: 0, label: 'Малоактивная', desc: 'Лежит большую часть времени — норма' },
+  { value: 1, label: 'Средняя',      desc: 'Стандартный уровень активности' },
+  { value: 2, label: 'Активная',     desc: 'Много двигается — норма' },
+]
+
 const STATUS_OPTIONS = [
   { value: '', label: 'Все' },
   { value: 'pending', label: 'Ожидает' },
@@ -33,6 +39,8 @@ export default function BookingsManager() {
   const [editForm, setEditForm] = useState({})
   const [editLoading, setEditLoading] = useState(false)
   const [editError, setEditError] = useState('')
+  const [checkInBooking, setCheckInBooking] = useState(null)
+  const [checkInLevel, setCheckInLevel] = useState(1)
 
   async function load() {
     setLoading(true)
@@ -43,9 +51,16 @@ export default function BookingsManager() {
 
   useEffect(() => { load() }, [status])
 
-  async function updateStatus(id, newStatus) {
-    await adminApi.updateBookingStatus(id, newStatus)
-    setBookings(prev => prev.map(b => b.id === id ? { ...b, status: newStatus } : b))
+  async function updateStatus(id, newStatus, activityLevel) {
+    await adminApi.updateBookingStatus(id, newStatus, activityLevel)
+    setBookings(prev => prev.map(b =>
+      b.id === id ? { ...b, status: newStatus, ...(activityLevel !== undefined && { activity_level: activityLevel }) } : b
+    ))
+  }
+
+  async function confirmCheckIn() {
+    await updateStatus(checkInBooking.id, 'active', checkInLevel)
+    setCheckInBooking(null)
   }
 
   function openEdit(b) {
@@ -200,7 +215,14 @@ export default function BookingsManager() {
                         {NEXT_STATUS[b.status] && b.extension_status !== 'pending' && (
                           <button
                             className="btn btn-secondary btn-sm"
-                            onClick={() => updateStatus(b.id, NEXT_STATUS[b.status])}
+                            onClick={() => {
+                              if (b.status === 'confirmed') {
+                                setCheckInLevel(1)
+                                setCheckInBooking(b)
+                              } else {
+                                updateStatus(b.id, NEXT_STATUS[b.status])
+                              }
+                            }}
                           >
                             {NEXT_LABELS[b.status]}
                           </button>
@@ -223,6 +245,55 @@ export default function BookingsManager() {
           )}
         </div>
       </div>
+
+      {/* Check-in activity level modal */}
+      {checkInBooking && (
+        <div className="modal-overlay" onClick={() => setCheckInBooking(null)}>
+          <div className="modal" style={{ maxWidth: 400 }} onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="modal-title">Заселение — {checkInBooking.pet?.name}</h3>
+              <button className="modal-close" onClick={() => setCheckInBooking(null)}>
+                <HiOutlineXMark size={20} />
+              </button>
+            </div>
+            <div className="modal-body">
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: 16 }}>
+                Укажите ожидаемый уровень активности собаки. Это влияет на чувствительность CV-алертов.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {ACTIVITY_LEVELS.map(opt => (
+                  <label
+                    key={opt.value}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 12,
+                      padding: '10px 14px', borderRadius: 8, cursor: 'pointer',
+                      border: `2px solid ${checkInLevel === opt.value ? 'var(--primary)' : 'var(--border)'}`,
+                      background: checkInLevel === opt.value ? 'var(--primary-ultra)' : 'transparent',
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="activity_level"
+                      value={opt.value}
+                      checked={checkInLevel === opt.value}
+                      onChange={() => setCheckInLevel(opt.value)}
+                      style={{ accentColor: 'var(--primary)' }}
+                    />
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{opt.label}</div>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>{opt.desc}</div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-ghost" onClick={() => setCheckInBooking(null)}>Отмена</button>
+              <button className="btn btn-primary" onClick={confirmCheckIn}>Заселить</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Edit modal */}
       {editBooking && (

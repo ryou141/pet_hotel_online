@@ -120,6 +120,7 @@ class Booking(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     extension_date = Column(Date, nullable=True)
     extension_status = Column(String(20), nullable=True)  # pending | approved | rejected
+    activity_level = Column(Integer, default=1)  # 0 = low, 1 = medium, 2 = high
 
     pet = relationship("Pet", back_populates="bookings")
     room = relationship("Room", back_populates="bookings")

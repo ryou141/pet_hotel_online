@@ -278,6 +278,7 @@ class BookingUpdate(BaseModel):
     check_in_date: Optional[date] = None
     check_out_date: Optional[date] = None
     notes: Optional[str] = None
+    activity_level: Optional[int] = None
 
 
 class BookingExtendRequest(BaseModel):
@@ -307,6 +308,7 @@ class BookingOut(BaseModel):
     created_at: datetime
     extension_date: Optional[date] = None
     extension_status: Optional[str] = None
+    activity_level: int = 1
     pet: Optional[PetOut] = None
     room: Optional[RoomOut] = None
     owner: Optional[OwnerBrief] = None

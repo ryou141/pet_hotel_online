@@ -53,7 +53,15 @@ def _has_recent_note(db, pet_id: int, tag: str) -> bool:
     ).first() is not None
 
 
-def _analyze(db, pet_id: int, pet_name: str, room_number: str):
+# Thresholds per activity_level:
+#   0 (low)    — INACTIVE alerts off (lying is normal), ACTIVE threshold lowered to 0.60
+#   1 (medium) — default: INACTIVE at 0.85/no-move, ACTIVE at 0.75
+#   2 (high)   — INACTIVE threshold lowered to 0.70, ACTIVE alerts off (moving is normal)
+_INACTIVE_THRESHOLD = {0: None,  1: 0.85, 2: 0.70}
+_ACTIVE_THRESHOLD   = {0: 0.60,  1: 0.75, 2: None}
+
+
+def _analyze(db, pet_id: int, pet_name: str, room_number: str, activity_level: int = 1):
     logs = (
         db.query(PetActivityLog)
         .filter(PetActivityLog.pet_id == pet_id)
@@ -72,8 +80,11 @@ def _analyze(db, pet_id: int, pet_name: str, room_number: str):
     still   = counts.get("lying", 0) + counts.get("sitting", 0)
     moving  = counts.get("moving", 0)
 
-    # Prolonged inactivity: ≥85% still, no movement at all
-    if still >= total * 0.85 and moving == 0:
+    inactive_thr = _INACTIVE_THRESHOLD.get(activity_level, 0.85)
+    active_thr   = _ACTIVE_THRESHOLD.get(activity_level, 0.75)
+
+    # Prolonged inactivity
+    if inactive_thr is not None and still >= total * inactive_thr and moving == 0:
         if not _has_recent_note(db, pet_id, "INACTIVE"):
             dominant = "lying" if counts.get("lying", 0) >= counts.get("sitting", 0) else "sitting"
             minutes  = (WINDOW_SIZE * INTERVAL_SECONDS) // 60
@@ -89,8 +100,8 @@ def _analyze(db, pet_id: int, pet_name: str, room_number: str):
             db.commit()
             logger.info("Generated INACTIVE note for pet %d", pet_id)
 
-    # Hyperactivity: ≥75% moving
-    elif moving >= total * 0.75:
+    # Hyperactivity
+    elif active_thr is not None and moving >= total * active_thr:
         if not _has_recent_note(db, pet_id, "ACTIVE"):
             db.add(StaffNote(
                 pet_id=pet_id,
@@ -151,7 +162,7 @@ def _run_sync(iteration: int):
         if iteration % ANALYZE_EVERY == 0 and iteration > 0:
             for b in bookings:
                 if b.pet and b.room:
-                    _analyze(db, b.pet_id, b.pet.name, b.room.number)
+                    _analyze(db, b.pet_id, b.pet.name, b.room.number, b.activity_level or 1)
 
     except Exception as exc:
         logger.error("Activity monitor error: %s", exc)

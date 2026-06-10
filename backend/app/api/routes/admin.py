@@ -116,6 +116,7 @@ def get_all_bookings(
 def update_booking_status(
     booking_id: int,
     status: str,
+    activity_level: Optional[int] = Query(None),
     _: User = Depends(get_strict_admin),
     db: Session = Depends(get_db),
 ):
@@ -126,6 +127,10 @@ def update_booking_status(
     if status not in valid:
         raise HTTPException(status_code=400, detail="Недопустимый статус")
     booking.status = status
+    if status == "active" and activity_level is not None:
+        if activity_level not in (0, 1, 2):
+            raise HTTPException(status_code=400, detail="activity_level должен быть 0, 1 или 2")
+        booking.activity_level = activity_level
     if status == "confirmed":
         room = db.query(Room).filter(Room.id == booking.room_id).first()
         if room:

@@ -60,23 +60,23 @@ def _run_notes_sync():
             ).first()
 
             if not camera:
-                content = f"[CV] Камера в комнате №{b.room.number} не подключена"
+                continue
+
+            frame = _capture_frame(camera.stream_url)
+            if frame is None:
+                continue
+
+            result = _run_yolo(frame)
+            state = result.get("state", "unknown")
+            conf  = int(result.get("confidence", 0) * 100)
+            state_ru = STATE_RU.get(state, state)
+
+            if state == "unknown":
+                content = f"[CV] {b.pet.name} — не обнаружен в кадре (комната №{b.room.number})"
             else:
-                frame = _capture_frame(camera.stream_url)
-                if frame is None:
-                    content = f"[CV] Камера в комнате №{b.room.number} недоступна"
-                else:
-                    result = _run_yolo(frame)
-                    state = result.get("state", "unknown")
-                    conf  = int(result.get("confidence", 0) * 100)
-                    state_ru = STATE_RU.get(state, state)
+                content = f"[CV] {b.pet.name} {state_ru} — комната №{b.room.number} (уверенность {conf}%)"
 
-                    if state == "unknown":
-                        content = f"[CV] {b.pet.name} — не обнаружен в кадре (комната №{b.room.number})"
-                    else:
-                        content = f"[CV] {b.pet.name} {state_ru} — комната №{b.room.number} (уверенность {conf}%)"
-
-            db.add(StaffNote(pet_id=b.pet_id, staff_id=None, content=content, is_public=True))
+            db.add(StaffNote(pet_id=b.pet_id, staff_id=None, content=content, is_public=False))
             count += 1
 
         db.commit()

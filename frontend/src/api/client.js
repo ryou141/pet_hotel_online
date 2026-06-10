@@ -130,7 +130,7 @@ export const adminApi = {
   changeRole: (id, role) => api.put(`/api/admin/users/${id}/role`, null, { params: { role } }),
   allPets: (search) => api.get('/api/admin/pets', { params: { search } }),
   allBookings: (status, search) => api.get('/api/admin/bookings', { params: { status, search } }),
-  updateBookingStatus: (id, status) => api.put(`/api/admin/bookings/${id}/status`, null, { params: { status } }),
+  updateBookingStatus: (id, status, activity_level) => api.put(`/api/admin/bookings/${id}/status`, null, { params: { status, ...(activity_level !== undefined && { activity_level }) } }),
   editBooking: (id, d) => api.put(`/api/admin/bookings/${id}`, d),
   handleExtension: (id, action) => api.put(`/api/admin/bookings/${id}/extension`, null, { params: { action } }),
   addGallery: (d) => api.post('/api/admin/gallery', d),
