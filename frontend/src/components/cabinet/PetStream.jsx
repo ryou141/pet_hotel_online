@@ -56,7 +56,7 @@ export default function PetStream({ petId }) {
           <span className="camera-live-dot" />
           LIVE
         </div>
-        <HlsPlayer src={camera.stream_url} />
+        <HlsPlayer src={camera.hls_url || camera.stream_url} />
       </div>
     </div>
   )

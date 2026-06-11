@@ -79,6 +79,7 @@ class Camera(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), nullable=False)
     stream_url = Column(String(500), nullable=False)
+    hls_url = Column(String(500), nullable=True)
     room_id = Column(Integer, ForeignKey("rooms.id"), nullable=True)
     zone_type = Column(String(20), default="room")  # room | public
     is_active = Column(Boolean, default=True)

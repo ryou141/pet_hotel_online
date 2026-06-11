@@ -23,7 +23,8 @@ export default function CamerasManager() {
 
   const FIELDS = [
     { name: 'name', label: 'Название камеры', required: true, placeholder: 'Игровая зона' },
-    { name: 'stream_url', label: 'URL трансляции', required: true, placeholder: 'https://...' },
+    { name: 'stream_url', label: 'URL для CV-модуля (RTMP/HLS)', required: true, placeholder: 'rtmp://...' },
+    { name: 'hls_url', label: 'URL для браузера (HLS)', placeholder: 'http://paw-hotel.ru:8080/hls/room1.m3u8' },
     { name: 'zone_type', label: 'Тип зоны', type: 'select', default: 'room', options: [{ value: 'public', label: 'Общая зона' }, { value: 'room', label: 'Комната' }] },
     { name: 'room_id', label: 'Комната', type: 'select', numeric: true, options: [{ value: '', label: '— не привязана —' }, ...roomOptions] },
     { name: 'is_active', label: 'Активна', type: 'checkbox', default: true, checkLabel: 'Камера активна' },

@@ -205,6 +205,7 @@ class RoomOut(RoomBase):
 class CameraBase(BaseModel):
     name: str
     stream_url: str
+    hls_url: Optional[str] = None
     room_id: Optional[int] = None
     zone_type: str = "room"
     is_active: bool = True
@@ -217,6 +218,7 @@ class CameraCreate(CameraBase):
 class CameraUpdate(BaseModel):
     name: Optional[str] = None
     stream_url: Optional[str] = None
+    hls_url: Optional[str] = None
     room_id: Optional[int] = None
     zone_type: Optional[str] = None
     is_active: Optional[bool] = None
