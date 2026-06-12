@@ -20,7 +20,8 @@ async function uploadFile(file) {
   const form = new FormData()
   form.append('file', file)
   const { data } = await api.post('/api/upload', form, { headers: { 'Content-Type': 'multipart/form-data' } })
-  return data.url
+  const base = api.defaults.baseURL || ''
+  return data.url.startsWith('http') ? data.url : `${base}${data.url}`
 }
 
 export default function CrudManager({
