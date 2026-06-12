@@ -1,10 +1,14 @@
 import asyncio
-from fastapi import FastAPI
+import os
+import uuid
+from fastapi import FastAPI, UploadFile, File, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 from app.database import engine
 from app.models.models import Base
 from app.api.routes import auth, users, pets, rooms, bookings, staff, cameras, gallery, tariffs, notes, admin, activity
+from app.api.deps import get_current_admin
 from app.cv.detector import router as cv_router
 from app.cv.auto_notes import cv_auto_notes_loop
 from app.cv.daily_report import daily_report_loop
@@ -33,6 +37,10 @@ def create_initial_admin():
             db.commit()
     finally:
         db.close()
+
+
+UPLOAD_DIR = "/app/static/uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 @asynccontextmanager
@@ -75,6 +83,22 @@ app.include_router(activity.router, prefix="/api/activity", tags=["Активн�
 
 
 app.include_router(cv_router, tags=["CV Детекция"])
+
+app.mount("/static", StaticFiles(directory="/app/static"), name="static")
+
+
+@app.post("/api/upload", tags=["Загрузка файлов"])
+async def upload_file(file: UploadFile = File(...), _=Depends(get_current_admin)):
+    ext = os.path.splitext(file.filename)[1].lower()
+    if ext not in (".jpg", ".jpeg", ".png", ".webp", ".gif"):
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail="Недопустимый формат файла")
+    filename = f"{uuid.uuid4().hex}{ext}"
+    path = os.path.join(UPLOAD_DIR, filename)
+    content = await file.read()
+    with open(path, "wb") as f:
+        f.write(content)
+    return {"url": f"/static/uploads/{filename}"}
 
 
 @app.get("/api/health")

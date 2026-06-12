@@ -13,7 +13,15 @@
  */
 import { useState, useEffect } from 'react'
 import { HiOutlineMagnifyingGlass, HiOutlinePlus, HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi2'
+import api from '../../api/client'
 import './CrudManager.css'
+
+async function uploadFile(file) {
+  const form = new FormData()
+  form.append('file', file)
+  const { data } = await api.post('/api/upload', form, { headers: { 'Content-Type': 'multipart/form-data' } })
+  return data.url
+}
 
 export default function CrudManager({
   title, icon, columns, fetchFn, createFn, updateFn, deleteFn, formFields = [], searchable = true,
@@ -71,7 +79,7 @@ export default function CrudManager({
     setSaving(true)
     setError('')
     try {
-      const payload = { ...form }
+      const payload = Object.fromEntries(Object.entries(form).filter(([k]) => !k.startsWith('__')))
       // Convert array fields from comma-separated string
       formFields.forEach(f => {
         if (f.type === 'tags' && typeof payload[f.name] === 'string') {
@@ -219,6 +227,32 @@ export default function CrudManager({
                       />
                       {field.checkLabel || 'Да'}
                     </label>
+                  ) : field.type === 'upload' ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      {form[field.name] && (
+                        <img src={form[field.name]} alt="" style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--border)' }} />
+                      )}
+                      <label className="btn btn-ghost btn-sm" style={{ cursor: 'pointer', margin: 0 }}>
+                        {form[`__uploading_${field.name}`] ? 'Загрузка...' : form[field.name] ? 'Заменить фото' : 'Загрузить фото'}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          style={{ display: 'none' }}
+                          disabled={!!form[`__uploading_${field.name}`]}
+                          onChange={async e => {
+                            const file = e.target.files[0]
+                            if (!file) return
+                            setForm(f => ({ ...f, [`__uploading_${field.name}`]: true }))
+                            try {
+                              const url = await uploadFile(file)
+                              setForm(f => ({ ...f, [field.name]: url, [`__uploading_${field.name}`]: false }))
+                            } catch {
+                              setForm(f => ({ ...f, [`__uploading_${field.name}`]: false }))
+                            }
+                          }}
+                        />
+                      </label>
+                    </div>
                   ) : (
                     <input
                       className="form-control"

@@ -15,7 +15,7 @@ const FIELDS = [
   { name: 'first_name', label: 'Имя', required: true },
   { name: 'last_name', label: 'Фамилия', required: true },
   { name: 'position', label: 'Должность', required: true, placeholder: 'Ветеринар' },
-  { name: 'photo_url', label: 'Фото (ссылка на изображение)', placeholder: 'https://...' },
+  { name: 'photo_url', label: 'Фото', type: 'upload' },
   { name: 'description', label: 'Описание', type: 'textarea', placeholder: 'Краткая биография...' },
   { name: 'is_active', label: 'Активен', type: 'checkbox', default: true, checkLabel: 'Отображать на сайте' },
 ]
